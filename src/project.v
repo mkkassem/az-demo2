@@ -5,9 +5,9 @@
 
 `default_nettype none
 
-module tt_um_example (
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
+module tt_um_LFSR_Encrypt (
+    input  wire [7:0] ui_in,    // Data in
+    output wire [7:0] uo_out,   // LFSR output
     input  wire [7:0] uio_in,   // IOs: Input path
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
@@ -16,12 +16,25 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+  reg [7:0] lfsr_d, lfsr_q;
 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  always @(*) begin
+    lfsr_d = {lfsr_q[6:0], (lfsr_q[0] ^ lfsr_q[5] ^ lfsr_q[6] ^ lfsr_q[7])};
+  end
+
+  always @(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
+      lfsr_q <= 8'b01000001;
+    end else if(ena) begin
+      lfsr_q <= lfsr_d;
+    end
+  end
+
+assign uo_out = lfsr_q ^ ui_in;
+assign uio_out = lfsr_q;
+
+assign uio_oe  = 0;
+
+wire _unused = &{uio_oe, uio_in};
 
 endmodule

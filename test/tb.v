@@ -6,7 +6,7 @@
 */
 module tb ();
 
-  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  // Dump the signals to a VCD file. You can view it with gtkwave.
   initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
@@ -28,7 +28,7 @@ module tb ();
 `endif
 
   // Replace tt_um_example with your module name:
-  tt_um_example user_project (
+  tt_um_LFSR_Encrypt uut (
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST
@@ -45,5 +45,20 @@ module tb ();
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
   );
+
+initial begin
+            clk <= '0;
+            forever #(20) clk = ~clk;
+        end
+
+ initial begin
+  clk = 0;
+  ui_in = '0; 
+  uio_in = '0; 
+  rst_n = 1;
+  #(1000) rst_n = 0;
+  #(1000000000);
+  $finish;
+ end 
 
 endmodule
